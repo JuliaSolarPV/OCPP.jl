@@ -63,5 +63,6 @@ isnothing(result)  # true if valid
 """
 function validate(version::Symbol, action::String, payload::AbstractDict, msg_type::Symbol)
     schema = _get_schema(version, action, msg_type)
-    return JSONSchema.diagnose(schema, payload)
+    result = JSONSchema.validate(schema, payload)
+    return isnothing(result) ? nothing : string(result)
 end

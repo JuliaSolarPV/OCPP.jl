@@ -705,7 +705,7 @@ function generate_types_from_definitions!(
     end
 
     # Detect which enum values appear in multiple enums (need prefixing)
-    # Also detect values that shadow Base names
+    # Also detect values that shadow Base names or collide with type names
     _BASE_NAMES = Set([
         "string",
         "print",
@@ -729,6 +729,16 @@ function generate_types_from_definitions!(
         end
     end
 
+    # Collect all type names that will be generated (enum types, object types,
+    # and action struct names) so enum members don't shadow them.
+    all_type_names = Set{String}()
+    for (_, jl) in def_type_map
+        push!(all_type_names, string(jl))
+    end
+    for (title, _) in schemas
+        push!(all_type_names, title)
+    end
+
     # 1. Generate enums
     for def_name in enum_def_names
         jl_name = def_type_map[def_name]
@@ -737,7 +747,8 @@ function generate_types_from_definitions!(
 
         needs_prefix =
             any(v -> value_count[v] > 1, values) ||
-            any(v -> _ocpp_string_to_identifier(v) in _BASE_NAMES, values)
+            any(v -> _ocpp_string_to_identifier(v) in _BASE_NAMES, values) ||
+            any(v -> _ocpp_string_to_identifier(v) in all_type_names, values)
         prefix = if haskey(prefix_overrides, def_name)
             prefix_overrides[def_name]
         elseif needs_prefix

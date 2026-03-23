@@ -43,8 +43,8 @@ Decode a raw OCPP-J JSON string into the appropriate OCPPMessage subtype.
 Dispatches on the first element (message type ID): 2=Call, 3=CallResult, 4=CallError.
 """
 function decode(raw::String)::OCPPMessage
-    arr = JSON.parse(raw)
-    type_id = arr[1]
+    arr = JSON.parse(raw)::Vector{Any}
+    type_id = arr[1]::Int
     if type_id == 2
         return Call(2, String(arr[2]), String(arr[3]), _to_dict(arr[4]))
     elseif type_id == 3
