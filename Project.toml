@@ -1,0 +1,7 @@
+name = "OCPP"
+uuid = "96fa3b67-1af3-5f07-99a6-8e4efc5edabb"
+authors = ["Stefan de Lange <langestefan@msn.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1.10"
