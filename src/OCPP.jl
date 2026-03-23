@@ -42,9 +42,12 @@ const _SCHEMA_DIR = joinpath(@__DIR__, "v201", "schemas")
 generate_types_from_definitions!(@__MODULE__, _SCHEMA_DIR, :V201_ACTIONS)
 end # module V201
 
+# Schema validation
+include("validation.jl")
+
 # Exports — protocol-level
 export OCPPMessage, Call, CallResult, CallError
-export encode, decode, generate_unique_id
+export encode, decode, generate_unique_id, validate
 
 # Re-export version submodules
 export V16, V201
