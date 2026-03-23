@@ -73,6 +73,14 @@ export V16, V201
     # Action registry
     V16.request_type("Heartbeat")
     V16.response_type("Heartbeat")
+
+    # Schema validation
+    validate(
+        :v16,
+        "BootNotification",
+        Dict{String,Any}("chargePointVendor" => "V", "chargePointModel" => "M"),
+        :request,
+    )
 end
 
 end # module OCPP
