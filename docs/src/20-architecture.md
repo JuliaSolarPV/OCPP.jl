@@ -4,7 +4,7 @@
 
 OCPP.jl generates all message types at **module load time** from the official OCPP JSON schema files. No types are hand-written — they are created programmatically via `Core.eval` when `using OCPP` is first called.
 
-```
+```text
 JSON schema files (src/v16/schemas/, src/v201/schemas/)
         │
         ▼
@@ -42,6 +42,7 @@ The generation pipeline:
 V201 schemas use JSON Schema's `definitions` + `$ref` pattern. Each schema file contains a `definitions` section with named types like `"ChargingStationType"` and `"BootReasonEnumType"`, referenced via `"$ref": "#/definitions/..."`.
 
 Because types are explicitly named in the schemas, V201 needs **no hand-curated registry**. Names are derived automatically:
+
 - `"BootReasonEnumType"` → `BootReason` (strip `EnumType` suffix)
 - `"ChargingStationType"` → `ChargingStation` (strip `Type` suffix)
 - Enum member prefixes are auto-derived from the definition name, applied when values collide across enums or shadow Base names
@@ -102,6 +103,7 @@ All types are created via `Core.eval` into the target module (V16 or V201):
 ### Enums
 
 Each OCPP enum becomes a Julia `@enum` with:
+
 - Forward dict: `EnumMember => "OCPPStringValue"`
 - Reverse dict: `"OCPPStringValue" => EnumMember`
 - `Base.string(x)` override returning the OCPP wire value
@@ -115,6 +117,7 @@ string(RegistrationAccepted)
 ### Structs
 
 Each message type becomes a `Base.@kwdef` struct with:
+
 - Required fields as plain typed fields (e.g., `charge_point_vendor::String`)
 - Optional fields as `Union{T, Nothing}` with default `nothing`
 - `StructUtils.fieldtags` mapping `snake_case` Julia names ↔ `camelCase` JSON names
@@ -143,7 +146,7 @@ V16.V16_ACTIONS["Heartbeat"]
 
 ## Module Structure
 
-```
+```text
 module OCPP                          # top-level
 ├── messages.jl                      # Call, CallResult, CallError types
 ├── codec.jl                         # encode/decode OCPP-J wire format

@@ -138,7 +138,7 @@ See [Validation](@ref validation) for the full API.
 
 A typical OCPP message handling pipeline looks like:
 
-```
+```text
 WebSocket frame (raw JSON string)
   → decode(raw)               # parse wire format → Call/CallResult/CallError
   → validate(:v16, ...)       # validate payload against schema (optional)

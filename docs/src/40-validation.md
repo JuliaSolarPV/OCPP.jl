@@ -5,6 +5,7 @@
 OCPP.jl includes a runtime validation layer powered by [JSONSchema.jl](https://github.com/fredo-dedup/JSONSchema.jl). This lets you validate raw message payloads (as `Dict`) against the official OCPP JSON schemas **before** attempting typed deserialization.
 
 This is useful for:
+
 - Validating incoming messages from untrusted charge points
 - Providing clear error diagnostics (missing fields, wrong types, invalid enum values)
 - Catching malformed messages early in the pipeline
@@ -107,6 +108,7 @@ isnothing(result)
 Schemas are **lazy-loaded and cached** on first use. The first call to `validate` for a given action reads the JSON schema file from disk and compiles it into a `JSONSchema.Schema` object. Subsequent calls for the same action reuse the cached schema.
 
 Schema files are resolved based on version-specific naming conventions:
+
 - **V16**: `BootNotification.json` (request), `BootNotificationResponse.json` (response)
 - **V201**: `BootNotificationRequest.json`, `BootNotificationResponse.json`
 

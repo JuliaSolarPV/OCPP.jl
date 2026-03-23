@@ -65,7 +65,7 @@ isnothing(result)  # true — payload is valid
 
 ## Package Structure
 
-```
+```text
 OCPP
 ├── Call, CallResult, CallError     # Wire-level message types
 ├── encode(), decode()              # OCPP-J codec
