@@ -12,3 +12,4 @@ env
 node_modules
 ocpp-files/
 OCPP_JL_DESIGN.md
+plugin-redoc-1.yaml
