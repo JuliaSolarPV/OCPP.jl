@@ -1,21 +1,21 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:ChangeConfigurationRequest",
-    "title": "ChangeConfigurationRequest",
-    "type": "object",
-    "properties": {
-        "key": {
-            "type": "string",
-            "maxLength": 50
-        },
-        "value": {
-            "type": "string",
-            "maxLength": 500
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:ChangeConfigurationRequest",
+  "properties": {
+    "key": {
+      "maxLength": 50,
+      "type": "string"
     },
-    "additionalProperties": false,
-    "required": [
-        "key",
-        "value"
-    ]
+    "value": {
+      "maxLength": 500,
+      "type": "string"
+    }
+  },
+  "required": [
+    "key",
+    "value"
+  ],
+  "title": "ChangeConfigurationRequest",
+  "type": "object"
 }

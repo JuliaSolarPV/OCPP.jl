@@ -1,24 +1,24 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:ChangeAvailabilityRequest",
-    "title": "ChangeAvailabilityRequest",
-    "type": "object",
-    "properties": {
-        "connectorId": {
-            "type": "integer"
-        },
-        "type": {
-            "type": "string",
-            "additionalProperties": false,
-            "enum": [
-                "Inoperative",
-                "Operative"
-            ]
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:ChangeAvailabilityRequest",
+  "properties": {
+    "connectorId": {
+      "type": "integer"
     },
-    "additionalProperties": false,
-    "required": [
-        "connectorId",
-        "type"
-    ]
+    "type": {
+      "additionalProperties": false,
+      "enum": [
+        "Inoperative",
+        "Operative"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "connectorId",
+    "type"
+  ],
+  "title": "ChangeAvailabilityRequest",
+  "type": "object"
 }

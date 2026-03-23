@@ -1,79 +1,79 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:GetCompositeScheduleResponse",
-    "title": "GetCompositeScheduleResponse",
-    "type": "object",
-    "properties": {
-        "status": {
-            "type": "string",
-            "additionalProperties": false,
-            "enum": [
-                "Accepted",
-                "Rejected"
-            ]
-        },
-    "connectorId": {
-        "type": "integer"
-        },
-    "scheduleStart": {
-        "type": "string",
-        "format": "date-time"
-    },
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:GetCompositeScheduleResponse",
+  "properties": {
     "chargingSchedule": {
-        "type": "object",
-        "properties": {
-            "duration": {
-                "type": "integer"
-            },
-            "startSchedule": {
-                "type": "string",
-                "format": "date-time"
-            },
-            "chargingRateUnit": {
-                "type": "string",
-                "additionalProperties": false,
-                "enum": [
-                    "A",
-                    "W"
-                    ]
-            },
-            "chargingSchedulePeriod": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "startPeriod": {
-                            "type": "integer"
-                        },
-                        "limit": {
-                            "type": "number",
-                            "multipleOf" : 0.1
-                        },
-                        "numberPhases": {
-                            "type": "integer"
-                        }
-                    },
-                    "additionalProperties": false,
-                    "required": [
-                        "startPeriod",
-                        "limit"
-                        ]
-                }
-            },
-            "minChargingRate": {
-                "type": "number",
-                "multipleOf" : 0.1
-            }
+      "additionalProperties": false,
+      "properties": {
+        "chargingRateUnit": {
+          "additionalProperties": false,
+          "enum": [
+            "A",
+            "W"
+          ],
+          "type": "string"
         },
-        "additionalProperties": false,
-        "required": [
-            "chargingRateUnit",
-            "chargingSchedulePeriod"
-        ]
+        "chargingSchedulePeriod": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "limit": {
+                "multipleOf": 0.1,
+                "type": "number"
+              },
+              "numberPhases": {
+                "type": "integer"
+              },
+              "startPeriod": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "startPeriod",
+              "limit"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "duration": {
+          "type": "integer"
+        },
+        "minChargingRate": {
+          "multipleOf": 0.1,
+          "type": "number"
+        },
+        "startSchedule": {
+          "format": "date-time",
+          "type": "string"
         }
+      },
+      "required": [
+        "chargingRateUnit",
+        "chargingSchedulePeriod"
+      ],
+      "type": "object"
     },
-    "additionalProperties": false,
-    "required": [
-        "status"
-    ]
+    "connectorId": {
+      "type": "integer"
+    },
+    "scheduleStart": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "status": {
+      "additionalProperties": false,
+      "enum": [
+        "Accepted",
+        "Rejected"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "GetCompositeScheduleResponse",
+  "type": "object"
 }

@@ -1,44 +1,44 @@
 {
   "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
   "comment": "OCPP 2.0.1 FINAL",
   "definitions": {
-	"CustomDataType": {
-	  "description": "This class does not get 'AdditionalProperties = false' in the schema generation, so it can be extended with arbitrary JSON properties to allow adding custom data.",
-	  "javaType": "CustomData",
-	  "type": "object",
-	  "properties": {
-		"vendorId": {
-		  "type": "string",
-		  "maxLength": 255
-		}
-	  },
-	  "required": [
-		"vendorId"
-	  ]
-	},
-	"UnpublishFirmwareStatusEnumType": {
-	  "description": "Indicates whether the Local Controller succeeded in unpublishing the firmware.\r\n",
-	  "javaType": "UnpublishFirmwareStatusEnum",
-	  "type": "string",
-	  "additionalProperties": false,
-	  "enum": [
-		"DownloadOngoing",
-		"NoFirmware",
-		"Unpublished"
-	  ]
-	}
+    "CustomDataType": {
+      "description": "This class does not get 'AdditionalProperties = false' in the schema generation, so it can be extended with arbitrary JSON properties to allow adding custom data.",
+      "javaType": "CustomData",
+      "properties": {
+        "vendorId": {
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendorId"
+      ],
+      "type": "object"
+    },
+    "UnpublishFirmwareStatusEnumType": {
+      "additionalProperties": false,
+      "description": "Indicates whether the Local Controller succeeded in unpublishing the firmware.\r\n",
+      "enum": [
+        "DownloadOngoing",
+        "NoFirmware",
+        "Unpublished"
+      ],
+      "javaType": "UnpublishFirmwareStatusEnum",
+      "type": "string"
+    }
   },
-  "type": "object",
-  "additionalProperties": false,
   "properties": {
-	"customData": {
-	  "$ref": "#/definitions/CustomDataType"
-	},
-	"status": {
-	  "$ref": "#/definitions/UnpublishFirmwareStatusEnumType"
-	}
+    "customData": {
+      "$ref": "#/definitions/CustomDataType"
+    },
+    "status": {
+      "$ref": "#/definitions/UnpublishFirmwareStatusEnumType"
+    }
   },
   "required": [
-	"status"
-  ]
+    "status"
+  ],
+  "type": "object"
 }

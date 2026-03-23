@@ -1,49 +1,49 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:BootNotificationRequest",
-    "title": "BootNotificationRequest",
-    "type": "object",
-    "properties": {
-        "chargePointVendor": {
-            "type": "string",
-            "maxLength": 20
-        },
-        "chargePointModel": {
-            "type": "string",
-            "maxLength": 20
-        },
-        "chargePointSerialNumber": {
-            "type": "string",
-            "maxLength": 25
-        },
-        "chargeBoxSerialNumber": {
-            "type": "string",
-            "maxLength": 25
-        },
-        "firmwareVersion": {
-            "type": "string",
-            "maxLength": 50
-        },
-        "iccid": {
-            "type": "string",
-            "maxLength": 20
-        },
-        "imsi": {
-            "type": "string",
-            "maxLength": 20
-        },
-        "meterType": {
-            "type": "string",
-            "maxLength": 25
-        },
-        "meterSerialNumber": {
-            "type": "string",
-            "maxLength": 25
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:BootNotificationRequest",
+  "properties": {
+    "chargeBoxSerialNumber": {
+      "maxLength": 25,
+      "type": "string"
     },
-    "additionalProperties": false,
-    "required": [
-        "chargePointVendor",
-        "chargePointModel"
-    ]
+    "chargePointModel": {
+      "maxLength": 20,
+      "type": "string"
+    },
+    "chargePointSerialNumber": {
+      "maxLength": 25,
+      "type": "string"
+    },
+    "chargePointVendor": {
+      "maxLength": 20,
+      "type": "string"
+    },
+    "firmwareVersion": {
+      "maxLength": 50,
+      "type": "string"
+    },
+    "iccid": {
+      "maxLength": 20,
+      "type": "string"
+    },
+    "imsi": {
+      "maxLength": 20,
+      "type": "string"
+    },
+    "meterSerialNumber": {
+      "maxLength": 25,
+      "type": "string"
+    },
+    "meterType": {
+      "maxLength": 25,
+      "type": "string"
+    }
+  },
+  "required": [
+    "chargePointVendor",
+    "chargePointModel"
+  ],
+  "title": "BootNotificationRequest",
+  "type": "object"
 }

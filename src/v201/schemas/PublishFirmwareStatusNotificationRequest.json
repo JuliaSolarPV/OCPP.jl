@@ -1,65 +1,65 @@
 {
   "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
   "comment": "OCPP 2.0.1 FINAL",
   "definitions": {
-	"CustomDataType": {
-	  "description": "This class does not get 'AdditionalProperties = false' in the schema generation, so it can be extended with arbitrary JSON properties to allow adding custom data.",
-	  "javaType": "CustomData",
-	  "type": "object",
-	  "properties": {
-		"vendorId": {
-		  "type": "string",
-		  "maxLength": 255
-		}
-	  },
-	  "required": [
-		"vendorId"
-	  ]
-	},
-	"PublishFirmwareStatusEnumType": {
-	  "description": "This contains the progress status of the publishfirmware\r\ninstallation.\r\n",
-	  "javaType": "PublishFirmwareStatusEnum",
-	  "type": "string",
-	  "additionalProperties": false,
-	  "enum": [
-		"Idle",
-		"DownloadScheduled",
-		"Downloading",
-		"Downloaded",
-		"Published",
-		"DownloadFailed",
-		"DownloadPaused",
-		"InvalidChecksum",
-		"ChecksumVerified",
-		"PublishFailed"
-	  ]
-	}
+    "CustomDataType": {
+      "description": "This class does not get 'AdditionalProperties = false' in the schema generation, so it can be extended with arbitrary JSON properties to allow adding custom data.",
+      "javaType": "CustomData",
+      "properties": {
+        "vendorId": {
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendorId"
+      ],
+      "type": "object"
+    },
+    "PublishFirmwareStatusEnumType": {
+      "additionalProperties": false,
+      "description": "This contains the progress status of the publishfirmware\r\ninstallation.\r\n",
+      "enum": [
+        "Idle",
+        "DownloadScheduled",
+        "Downloading",
+        "Downloaded",
+        "Published",
+        "DownloadFailed",
+        "DownloadPaused",
+        "InvalidChecksum",
+        "ChecksumVerified",
+        "PublishFailed"
+      ],
+      "javaType": "PublishFirmwareStatusEnum",
+      "type": "string"
+    }
   },
-  "type": "object",
-  "additionalProperties": false,
   "properties": {
-	"customData": {
-	  "$ref": "#/definitions/CustomDataType"
-	},
-	"status": {
-	  "$ref": "#/definitions/PublishFirmwareStatusEnumType"
-	},
-	"location": {
-	  "description": "Required if status is Published. Can be multiple URI’s, if the Local Controller supports e.g. HTTP, HTTPS, and FTP.\r\n",
-	  "type": "array",
-	  "additionalItems": false,
-	  "items": {
-		"type": "string",
-		"maxLength": 512
-	  },
-	  "minItems": 1
-	},
-	"requestId": {
-	  "description": "The request id that was\r\nprovided in the\r\nPublishFirmwareRequest which\r\ntriggered this action.\r\n",
-	  "type": "integer"
-	}
+    "customData": {
+      "$ref": "#/definitions/CustomDataType"
+    },
+    "location": {
+      "additionalItems": false,
+      "description": "Required if status is Published. Can be multiple URI\u2019s, if the Local Controller supports e.g. HTTP, HTTPS, and FTP.\r\n",
+      "items": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "requestId": {
+      "description": "The request id that was\r\nprovided in the\r\nPublishFirmwareRequest which\r\ntriggered this action.\r\n",
+      "type": "integer"
+    },
+    "status": {
+      "$ref": "#/definitions/PublishFirmwareStatusEnumType"
+    }
   },
   "required": [
-	"status"
-  ]
+    "status"
+  ],
+  "type": "object"
 }

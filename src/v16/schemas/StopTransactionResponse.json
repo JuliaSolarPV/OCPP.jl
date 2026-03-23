@@ -1,37 +1,37 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:StopTransactionResponse",
-    "title": "StopTransactionResponse",
-    "type": "object",
-    "properties": {
-        "idTagInfo": {
-            "type": "object",
-            "properties": {
-                "expiryDate": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "parentIdTag": {
-                    "type": "string",
-                    "maxLength": 20
-                },
-                "status": {
-                    "type": "string",
-                    "additionalProperties": false,
-                    "enum": [
-                        "Accepted",
-                        "Blocked",
-                        "Expired",
-                        "Invalid",
-                        "ConcurrentTx"
-                    ]
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "status"
-            ]
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:StopTransactionResponse",
+  "properties": {
+    "idTagInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "expiryDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "parentIdTag": {
+          "maxLength": 20,
+          "type": "string"
+        },
+        "status": {
+          "additionalProperties": false,
+          "enum": [
+            "Accepted",
+            "Blocked",
+            "Expired",
+            "Invalid",
+            "ConcurrentTx"
+          ],
+          "type": "string"
         }
-    },
-    "additionalProperties": false
+      },
+      "required": [
+        "status"
+      ],
+      "type": "object"
+    }
+  },
+  "title": "StopTransactionResponse",
+  "type": "object"
 }

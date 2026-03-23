@@ -23,6 +23,7 @@ For test commands (run all, run single file, filter by tag), see the `julia-deve
 ## Code Style
 
 JuliaFormatter is enforced in CI. Config in `.JuliaFormatter.toml`:
+
 - Indent: 4 spaces
 - Line margin: 92 characters
 - Unix line endings

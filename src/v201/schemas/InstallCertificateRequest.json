@@ -1,51 +1,51 @@
 {
   "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
   "comment": "OCPP 2.0.1 FINAL",
   "definitions": {
-	"CustomDataType": {
-	  "description": "This class does not get 'AdditionalProperties = false' in the schema generation, so it can be extended with arbitrary JSON properties to allow adding custom data.",
-	  "javaType": "CustomData",
-	  "type": "object",
-	  "properties": {
-		"vendorId": {
-		  "type": "string",
-		  "maxLength": 255
-		}
-	  },
-	  "required": [
-		"vendorId"
-	  ]
-	},
-	"InstallCertificateUseEnumType": {
-	  "description": "Indicates the certificate type that is sent.\r\n",
-	  "javaType": "InstallCertificateUseEnum",
-	  "type": "string",
-	  "additionalProperties": false,
-	  "enum": [
-		"V2GRootCertificate",
-		"MORootCertificate",
-		"CSMSRootCertificate",
-		"ManufacturerRootCertificate"
-	  ]
-	}
+    "CustomDataType": {
+      "description": "This class does not get 'AdditionalProperties = false' in the schema generation, so it can be extended with arbitrary JSON properties to allow adding custom data.",
+      "javaType": "CustomData",
+      "properties": {
+        "vendorId": {
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendorId"
+      ],
+      "type": "object"
+    },
+    "InstallCertificateUseEnumType": {
+      "additionalProperties": false,
+      "description": "Indicates the certificate type that is sent.\r\n",
+      "enum": [
+        "V2GRootCertificate",
+        "MORootCertificate",
+        "CSMSRootCertificate",
+        "ManufacturerRootCertificate"
+      ],
+      "javaType": "InstallCertificateUseEnum",
+      "type": "string"
+    }
   },
-  "type": "object",
-  "additionalProperties": false,
   "properties": {
-	"customData": {
-	  "$ref": "#/definitions/CustomDataType"
-	},
-	"certificateType": {
-	  "$ref": "#/definitions/InstallCertificateUseEnumType"
-	},
-	"certificate": {
-	  "description": "A PEM encoded X.509 certificate.\r\n",
-	  "type": "string",
-	  "maxLength": 5500
-	}
+    "certificate": {
+      "description": "A PEM encoded X.509 certificate.\r\n",
+      "maxLength": 5500,
+      "type": "string"
+    },
+    "certificateType": {
+      "$ref": "#/definitions/InstallCertificateUseEnumType"
+    },
+    "customData": {
+      "$ref": "#/definitions/CustomDataType"
+    }
   },
   "required": [
-	"certificateType",
-	"certificate"
-  ]
+    "certificateType",
+    "certificate"
+  ],
+  "type": "object"
 }

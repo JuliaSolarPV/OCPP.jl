@@ -1,27 +1,27 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:GetCompositeScheduleRequest",
-    "title": "GetCompositeScheduleRequest",
-    "type": "object",
-    "properties": {
-        "connectorId": {
-            "type": "integer"
-        },
-    "duration": {
-        "type": "integer"
-    },
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:GetCompositeScheduleRequest",
+  "properties": {
     "chargingRateUnit": {
-        "type": "string",
-        "additionalProperties": false,
-        "enum": [
-            "A",
-            "W"
-            ]
-        }
+      "additionalProperties": false,
+      "enum": [
+        "A",
+        "W"
+      ],
+      "type": "string"
     },
-    "additionalProperties": false,
-    "required": [
-        "connectorId",
-        "duration"
-    ]
+    "connectorId": {
+      "type": "integer"
+    },
+    "duration": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "connectorId",
+    "duration"
+  ],
+  "title": "GetCompositeScheduleRequest",
+  "type": "object"
 }

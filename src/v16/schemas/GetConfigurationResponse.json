@@ -1,40 +1,40 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "urn:OCPP:1.6:2019:12:GetConfigurationResponse",
-    "title": "GetConfigurationResponse",
-    "type": "object",
-    "properties": {
-        "configurationKey": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "key": {
-                        "type": "string",
-                        "maxLength": 50
-                    },
-                    "readonly": {
-                        "type": "boolean"
-                    },
-                    "value": {
-                        "type": "string",
-                        "maxLength": 500
-                    }
-                },
-                "additionalProperties": false,
-                "required": [
-                    "key",
-                    "readonly"
-                ]
-            }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "id": "urn:OCPP:1.6:2019:12:GetConfigurationResponse",
+  "properties": {
+    "configurationKey": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "maxLength": 50,
+            "type": "string"
+          },
+          "readonly": {
+            "type": "boolean"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string"
+          }
         },
-        "unknownKey": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "maxLength": 50
-            }
-        }
+        "required": [
+          "key",
+          "readonly"
+        ],
+        "type": "object"
+      },
+      "type": "array"
     },
-    "additionalProperties": false
+    "unknownKey": {
+      "items": {
+        "maxLength": 50,
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "title": "GetConfigurationResponse",
+  "type": "object"
 }
