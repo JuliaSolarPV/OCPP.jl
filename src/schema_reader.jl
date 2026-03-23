@@ -426,9 +426,328 @@ function generate_types!(
         generate_struct!(mod, struct_name, fields)
 
         base = if endswith(title, "Response")
-            replace(title, "Response" => "")
+            title[1:(end - 8)]
         elseif endswith(title, "Request")
-            replace(title, "Request" => "")
+            title[1:(end - 7)]
+        else
+            title
+        end
+        if base ∉ action_names
+            push!(action_names, base)
+        end
+    end
+
+    # 4. Generate action registry
+    sort!(action_names)
+    registry_pairs = Expr[]
+    for action in action_names
+        req_sym = Symbol(action * "Request")
+        resp_sym = Symbol(action * "Response")
+        push!(registry_pairs, :($action => (request = $req_sym, response = $resp_sym)))
+    end
+
+    Core.eval(
+        mod,
+        :(
+            const $registry_name =
+                Dict{String,@NamedTuple{request::DataType,response::DataType}}(
+                    $(registry_pairs...),
+                )
+        ),
+    )
+    Core.eval(mod, :(export $registry_name, request_type, response_type))
+
+    Core.eval(
+        mod,
+        :(
+            function request_type(action::String)
+                haskey($registry_name, action) ||
+                    throw(ArgumentError("Unknown OCPP action: \$action"))
+                return $registry_name[action].request
+            end
+        ),
+    )
+    Core.eval(
+        mod,
+        :(
+            function response_type(action::String)
+                haskey($registry_name, action) ||
+                    throw(ArgumentError("Unknown OCPP action: \$action"))
+                return $registry_name[action].response
+            end
+        ),
+    )
+
+    return nothing
+end
+
+# ===========================================================================
+# V201-style schemas: types defined in "definitions" with $ref references
+# ===========================================================================
+
+"""Merge all `definitions` sections across schemas into one Dict."""
+function merge_definitions(schemas)
+    all_defs = Dict{String,Dict{String,Any}}()
+    for (_, schema) in schemas
+        defs = get(schema, "definitions", Dict{String,Any}())
+        for (name, defn) in defs
+            defn isa Dict || continue
+            if !haskey(all_defs, name)
+                all_defs[name] = defn
+            end
+        end
+    end
+    return all_defs
+end
+
+"""
+Derive a Julia type name from a v201 definition name.
+"BootReasonEnumType" → :BootReason, "ChargingStationType" → :ChargingStation
+"""
+function _def_to_julia_name(def_name::String)
+    if endswith(def_name, "EnumType")
+        return Symbol(def_name[1:(end - 8)])
+    elseif endswith(def_name, "Type")
+        return Symbol(def_name[1:(end - 4)])
+    else
+        return Symbol(def_name)
+    end
+end
+
+"""
+Derive an enum member prefix from a v201 definition name.
+"RegistrationStatusEnumType" → "Registration"
+"BootReasonEnumType" → "BootReason"
+"""
+function _enum_prefix(def_name::String)
+    base = replace(def_name, "EnumType" => "")
+    if endswith(base, "Status")
+        return base[1:(end - 6)]
+    end
+    return base
+end
+
+"""
+Resolve a property (which may contain `\$ref`) to a Julia type symbol.
+`def_type_map` maps definition names to Julia type symbols.
+"""
+function _resolve_ref_type(prop::Dict{String,Any}, def_type_map::Dict{String,Symbol})
+    if haskey(prop, "\$ref")
+        ref = prop["\$ref"]::String
+        def_name = last(split(ref, "/"))
+        return get(def_type_map, def_name, :Any)
+    end
+
+    jtype = get(prop, "type", "string")
+    if jtype == "string"
+        return :String
+    elseif jtype == "integer"
+        return :Int
+    elseif jtype == "number"
+        return :Float64
+    elseif jtype == "boolean"
+        return :Bool
+    elseif jtype == "array"
+        items = get(prop, "items", Dict{String,Any}())
+        if items isa Dict
+            if haskey(items, "\$ref")
+                ref = items["\$ref"]::String
+                def_name = last(split(ref, "/"))
+                inner = get(def_type_map, def_name, :Any)
+                return :(Vector{$inner})
+            end
+            item_type = get(items, "type", "string")
+            if item_type == "string"
+                return :(Vector{String})
+            elseif item_type == "integer"
+                return :(Vector{Int})
+            end
+        end
+        return :(Vector{Any})
+    elseif jtype == "object"
+        return :(Dict{String,Any})
+    end
+    return :Any
+end
+
+"""Extract struct fields from a v201 schema/definition, resolving `\$ref`."""
+function fields_from_ref_schema(schema::Dict{String,Any}, def_type_map::Dict{String,Symbol})
+    props = get(schema, "properties", Dict{String,Any}())
+    required_set = Set{String}(get(schema, "required", String[]))
+
+    fields =
+        NamedTuple{(:json_name, :jl_name, :type, :required),Tuple{String,Symbol,Any,Bool}}[]
+
+    for (json_name, prop) in props
+        prop isa Dict || continue
+        jl_name = Symbol(_camel_to_snake(json_name))
+        jl_type = _resolve_ref_type(prop, def_type_map)
+        is_required = json_name in required_set
+        push!(
+            fields,
+            (json_name = json_name, jl_name = jl_name, type = jl_type, required = is_required),
+        )
+    end
+
+    sort!(fields; by = f -> (!f.required, f.json_name))
+    return fields
+end
+
+"""Topologically sort definition names so dependencies come first."""
+function _topo_sort_defs(names::Vector{String}, all_defs::Dict{String,Dict{String,Any}})
+    name_set = Set(names)
+    deps = Dict{String,Set{String}}()
+    for name in names
+        deps[name] = Set{String}()
+        defn = all_defs[name]
+        props = get(defn, "properties", Dict{String,Any}())
+        for (_, prop) in props
+            prop isa Dict || continue
+            if haskey(prop, "\$ref")
+                ref_name = last(split(prop["\$ref"]::String, "/"))
+                if ref_name in name_set && ref_name != name
+                    push!(deps[name], ref_name)
+                end
+            end
+            if get(prop, "type", nothing) == "array"
+                items = get(prop, "items", Dict{String,Any}())
+                if items isa Dict && haskey(items, "\$ref")
+                    ref_name = last(split(items["\$ref"]::String, "/"))
+                    if ref_name in name_set && ref_name != name
+                        push!(deps[name], ref_name)
+                    end
+                end
+            end
+        end
+    end
+
+    ordered = String[]
+    placed = Set{String}()
+    remaining = Set(names)
+
+    while !isempty(remaining)
+        progress = false
+        for name in sort(collect(remaining))
+            if deps[name] ⊆ placed
+                push!(ordered, name)
+                push!(placed, name)
+                delete!(remaining, name)
+                progress = true
+            end
+        end
+        if !progress
+            append!(ordered, sort(collect(remaining)))
+            break
+        end
+    end
+    return ordered
+end
+
+"""
+    generate_types_from_definitions!(mod, schema_dir, registry_name; ...)
+
+Generate types from v201-style schemas that use `definitions` + `\$ref`.
+Enum and type names are derived from definition names. Enum member prefixes
+are auto-derived but can be overridden via `prefix_overrides`.
+"""
+function generate_types_from_definitions!(
+    mod::Module,
+    schema_dir::String,
+    registry_name::Symbol;
+    prefix_overrides::Dict{String,String} = Dict{String,String}(),
+    skip_definitions::Set{String} = Set{String}(),
+)
+    schemas = read_schemas(schema_dir)
+    all_defs = merge_definitions(schemas)
+
+    # Separate enum definitions from object definitions
+    enum_def_names = String[]
+    object_def_names = String[]
+    for (name, defn) in all_defs
+        name in skip_definitions && continue
+        if haskey(defn, "enum")
+            push!(enum_def_names, name)
+        elseif get(defn, "type", nothing) == "object" && haskey(defn, "properties")
+            push!(object_def_names, name)
+        end
+    end
+    sort!(enum_def_names)
+    sort!(object_def_names)
+
+    # Build def_name → Julia type name mapping (for $ref resolution)
+    # Object types first, then enums (resolve collisions by keeping "Enum" suffix)
+    def_type_map = Dict{String,Symbol}()
+    obj_jl_names = Set{Symbol}()
+    for name in object_def_names
+        jl = _def_to_julia_name(name)
+        def_type_map[name] = jl
+        push!(obj_jl_names, jl)
+    end
+    for name in enum_def_names
+        jl = _def_to_julia_name(name)
+        if jl in obj_jl_names
+            # Collision: keep "Enum" suffix (e.g. IdTokenEnumType → IdTokenEnum)
+            jl = Symbol(replace(name, "EnumType" => "Enum", "Type" => ""))
+        end
+        def_type_map[name] = jl
+    end
+
+    # Detect which enum values appear in multiple enums (need prefixing)
+    # Also detect values that shadow Base names
+    _BASE_NAMES = Set(["string", "print", "show", "read", "write", "open",
+        "close", "nothing", "missing", "true", "false", "Int", "Float64"])
+    value_count = Dict{String,Int}()
+    for name in enum_def_names
+        for v in all_defs[name]["enum"]
+            sv = string(v)
+            value_count[sv] = get(value_count, sv, 0) + 1
+        end
+    end
+
+    # 1. Generate enums
+    for def_name in enum_def_names
+        jl_name = def_type_map[def_name]
+        defn = all_defs[def_name]
+        values = [string(v) for v in defn["enum"]]
+
+        needs_prefix = any(v -> value_count[v] > 1, values) ||
+                       any(v -> _ocpp_string_to_identifier(v) in _BASE_NAMES, values)
+        prefix = if haskey(prefix_overrides, def_name)
+            prefix_overrides[def_name]
+        elseif needs_prefix
+            _enum_prefix(def_name)
+        else
+            ""
+        end
+
+        members = Pair{Symbol,String}[]
+        for v in values
+            member = _make_member_name(prefix, v)
+            push!(members, member => v)
+        end
+        generate_enum!(mod, jl_name, members)
+    end
+
+    # 2. Generate object types (topologically sorted)
+    sorted_obj_names = _topo_sort_defs(object_def_names, all_defs)
+    for def_name in sorted_obj_names
+        jl_name = def_type_map[def_name]
+        defn = all_defs[def_name]
+        fields = fields_from_ref_schema(defn, def_type_map)
+        generate_struct!(mod, jl_name, fields)
+    end
+
+    # 3. Generate action payload structs
+    action_names = String[]
+    for (title, schema) in schemas
+        struct_name = Symbol(title)
+        fields = fields_from_ref_schema(schema, def_type_map)
+        generate_struct!(mod, struct_name, fields)
+
+        base = if endswith(title, "Response")
+            title[1:(end - 8)]
+        elseif endswith(title, "Request")
+            title[1:(end - 7)]
         else
             title
         end

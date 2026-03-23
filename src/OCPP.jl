@@ -22,8 +22,7 @@ using ..OCPP: generate_types!
 
 include("v16/registries.jl")
 
-const _SCHEMA_DIR =
-    joinpath(@__DIR__, "..", "ocpp-files", "OCPP_1.6_documentation", "schemas", "json")
+const _SCHEMA_DIR = joinpath(@__DIR__, "v16", "schemas")
 generate_types!(
     @__MODULE__,
     _SCHEMA_DIR,
@@ -33,12 +32,22 @@ generate_types!(
 )
 end # module V16
 
+# OCPP 2.0.1 submodule
+module V201
+using StructTypes
+using JSON3
+using ..OCPP: generate_types_from_definitions!
+
+const _SCHEMA_DIR = joinpath(@__DIR__, "v201", "schemas")
+generate_types_from_definitions!(@__MODULE__, _SCHEMA_DIR, :V201_ACTIONS)
+end # module V201
+
 # Exports — protocol-level
 export OCPPMessage, Call, CallResult, CallError
 export encode, decode, generate_unique_id
 
-# Re-export V16 submodule
-export V16
+# Re-export version submodules
+export V16, V201
 
 # Precompile common operations to reduce TTFX
 @compile_workload begin
