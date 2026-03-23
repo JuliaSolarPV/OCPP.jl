@@ -5,10 +5,10 @@
 #   julia --project=test -e 'using TestItemRunner; @run_package_tests filter=ti->(:crossvalidation in ti.tags) verbose=true'
 
 @testsnippet PythonOCPP begin
+    import JSON
     using CondaPkg
     CondaPkg.add_pip("ocpp"; version = ">=2.0.0")
     using PythonCall
-    import JSON
 
     const _ocpp_messages = pyimport("ocpp.messages")
     const _pyjson = pyimport("json")
