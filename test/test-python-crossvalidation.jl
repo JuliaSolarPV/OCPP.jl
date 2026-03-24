@@ -318,7 +318,11 @@ end
             "1.6",
             GetConfigurationResponse(
                 configuration_key = [
-                    KeyValueType(key = "HeartbeatInterval", readonly = false, value = "300"),
+                    KeyValueType(
+                        key = "HeartbeatInterval",
+                        readonly = false,
+                        value = "300",
+                    ),
                 ],
                 unknown_key = ["NonExistentKey"],
             ),
@@ -594,9 +598,7 @@ end
         py_validate_response(
             "Authorize",
             "2.0.1",
-            AuthorizeResponse(
-                id_token_info = IdTokenInfo(status = AuthorizationAccepted),
-            ),
+            AuthorizeResponse(id_token_info = IdTokenInfo(status = AuthorizationAccepted)),
         )
         @test true
     end
@@ -753,11 +755,7 @@ end
 
     @testset "Reset req+resp" begin
         py_validate_request("Reset", "2.0.1", ResetRequest(type = Immediate))
-        py_validate_response(
-            "Reset",
-            "2.0.1",
-            ResetResponse(status = ResetAccepted),
-        )
+        py_validate_response("Reset", "2.0.1", ResetResponse(status = ResetAccepted))
         @test true
     end
 
@@ -977,10 +975,7 @@ end
         py_validate_request(
             "GetBaseReport",
             "2.0.1",
-            GetBaseReportRequest(
-                request_id = 1,
-                report_base = ConfigurationInventory,
-            ),
+            GetBaseReportRequest(request_id = 1, report_base = ConfigurationInventory),
         )
         py_validate_response(
             "GetBaseReport",
@@ -997,16 +992,10 @@ end
             GetLogRequest(
                 log_type = DiagnosticsLog,
                 request_id = 1,
-                log = LogParameters(
-                    remote_location = "https://logs.example.com/upload",
-                ),
+                log = LogParameters(remote_location = "https://logs.example.com/upload"),
             ),
         )
-        py_validate_response(
-            "GetLog",
-            "2.0.1",
-            GetLogResponse(status = LogAccepted),
-        )
+        py_validate_response("GetLog", "2.0.1", GetLogResponse(status = LogAccepted))
         @test true
     end
 
