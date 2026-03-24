@@ -6,8 +6,6 @@
 
 @testsnippet PythonOCPP begin
     import JSON
-    using CondaPkg
-    CondaPkg.add_pip("ocpp"; version = ">=2.0.0")
     using PythonCall
 
     const _ocpp_messages = pyimport("ocpp.messages")
