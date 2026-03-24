@@ -117,10 +117,7 @@ export V16, V201
         "BootNotification",
         Dict{String,Any}(
             "reason" => "PowerUp",
-            "chargingStation" => Dict{String,Any}(
-                "vendorName" => "V",
-                "model" => "M",
-            ),
+            "chargingStation" => Dict{String,Any}("vendorName" => "V", "model" => "M"),
         ),
         :request,
     )
