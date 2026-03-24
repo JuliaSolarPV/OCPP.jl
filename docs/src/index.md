@@ -59,7 +59,7 @@ decoded.action
 
 ```@example quickstart
 # Validate against JSON schema
-result = validate(:v16, "BootNotification", decoded.payload, :request)
+result = validate(V16.Spec(), "BootNotification", decoded.payload, :request)
 isnothing(result)  # true — payload is valid
 ```
 

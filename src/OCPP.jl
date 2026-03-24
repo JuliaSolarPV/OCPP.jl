@@ -20,7 +20,6 @@ using StructUtils
 using JSON
 using ..OCPP: @generate_ocpp_types, AbstractOCPPSpec
 
-"""Spec singleton for OCPP 1.6. Pass `V16.Spec()` to version-dispatched functions."""
 struct Spec <: AbstractOCPPSpec end
 export Spec
 
@@ -36,7 +35,6 @@ using StructUtils
 using JSON
 using ..OCPP: @generate_ocpp_types_from_definitions, AbstractOCPPSpec
 
-"""Spec singleton for OCPP 2.0.1. Pass `V201.Spec()` to version-dispatched functions."""
 struct Spec <: AbstractOCPPSpec end
 export Spec
 
