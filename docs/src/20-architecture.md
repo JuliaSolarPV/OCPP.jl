@@ -32,11 +32,11 @@ V16 and V201 schemas have fundamentally different structures:
 - **V16**: Flat schemas — each file has inline properties, no named types. Requires a hand-curated registry to name enums and shared types.
 - **V201**: Self-describing schemas — uses `definitions` + `$ref` with explicit type names. No registry needed.
 
-This is handled by two entry points in `schema_reader.jl`: `generate_types!` (V16) and `generate_types_from_definitions!` (V201).
+This is handled by two macros in `schema_reader.jl`: `@generate_ocpp_types` (V16) and `@generate_ocpp_types_from_definitions` (V201).
 
-### Why `Core.eval`?
+### Why macros?
 
-Types are determined from data (JSON files), not from source code. `Core.eval(mod, expr)` is the mechanism for creating types programmatically inside a module at load time. The cost is paid once at precompilation and cached.
+Types are determined from data (JSON files), not from source code. The two macros read the schema files at macro-expansion time, build Julia AST (`Expr` objects) for all enums, structs, and registries, and return that AST via `esc(Expr(:block, ...))` — standard macro expansion. The cost is paid once at precompilation and cached.
 
 ### Why submodules?
 
@@ -62,7 +62,7 @@ fieldnames(OCPP.V201.BootNotificationRequest)
                     │                                         │
                     │  JSON schemas ──→ schema_reader.jl      │
                     │                     │                   │
-                    │                Core.eval()              │
+                    │              macro expansion            │
                     │                     │                   │
                     │              V16/V201 modules           │
                     │          (structs, enums, registry)     │
