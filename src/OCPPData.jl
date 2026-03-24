@@ -18,6 +18,7 @@ include("schema_reader.jl")
 module V16
 using StructUtils
 using JSON
+import JSONSchema
 using ..OCPPData: @generate_ocpp_types, AbstractOCPPSpec
 
 struct Spec <: AbstractOCPPSpec end
@@ -27,12 +28,15 @@ include("v16/registries.jl")
 
 const _SCHEMA_DIR = joinpath(@__DIR__, "v16", "schemas")
 @generate_ocpp_types _SCHEMA_DIR V16_ENUM_REGISTRY V16_NESTED_TYPE_NAMES :V16_ACTIONS
+
+const _SCHEMAS = Dict{String,JSONSchema.Schema}()
 end # module V16
 
 # OCPP 2.0.1 submodule
 module V201
 using StructUtils
 using JSON
+import JSONSchema
 using ..OCPPData: @generate_ocpp_types_from_definitions, AbstractOCPPSpec
 
 struct Spec <: AbstractOCPPSpec end
@@ -40,10 +44,26 @@ export Spec
 
 const _SCHEMA_DIR = joinpath(@__DIR__, "v201", "schemas")
 @generate_ocpp_types_from_definitions _SCHEMA_DIR :V201_ACTIONS
+
+const _SCHEMAS = Dict{String,JSONSchema.Schema}()
 end # module V201
 
 # Schema validation
 include("validation.jl")
+
+# Eagerly load all schemas at module init time
+_load_all_schemas!(
+    V16._SCHEMAS,
+    V16._SCHEMA_DIR,
+    V16.V16_ACTIONS,
+    (a, mt) -> mt == :request ? "$(a).json" : "$(a)Response.json",
+)
+_load_all_schemas!(
+    V201._SCHEMAS,
+    V201._SCHEMA_DIR,
+    V201.V201_ACTIONS,
+    (a, mt) -> mt == :request ? "$(a)Request.json" : "$(a)Response.json",
+)
 
 # Exports — protocol-level
 export OCPPMessage, Call, CallResult, CallError
@@ -75,12 +95,44 @@ export V16, V201
     V16.request_type("Heartbeat")
     V16.response_type("Heartbeat")
 
-    # Schema validation
+    # Schema validation — all four dispatch paths (V16/V201 × request/response)
     validate(
         V16.Spec(),
         "BootNotification",
         Dict{String,Any}("chargePointVendor" => "V", "chargePointModel" => "M"),
         :request,
+    )
+    validate(
+        V16.Spec(),
+        "BootNotification",
+        Dict{String,Any}(
+            "status" => "Accepted",
+            "currentTime" => "2025-01-01T00:00:00Z",
+            "interval" => 300,
+        ),
+        :response,
+    )
+    validate(
+        V201.Spec(),
+        "BootNotification",
+        Dict{String,Any}(
+            "reason" => "PowerUp",
+            "chargingStation" => Dict{String,Any}(
+                "vendorName" => "V",
+                "model" => "M",
+            ),
+        ),
+        :request,
+    )
+    validate(
+        V201.Spec(),
+        "BootNotification",
+        Dict{String,Any}(
+            "status" => "Accepted",
+            "currentTime" => "2025-01-01T00:00:00.000Z",
+            "interval" => 300,
+        ),
+        :response,
     )
 end
 

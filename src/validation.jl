@@ -1,42 +1,52 @@
 """
 Runtime validation of OCPP message payloads against JSON schemas using JSONSchema.jl.
 
-Schemas are lazy-loaded and cached on first use. Version-specific behaviour
-(schema directory, filename convention) is resolved via multiple dispatch on
-the `AbstractOCPPSpec` subtype passed as the first argument.
+Schemas are eagerly loaded at module init time into per-version dictionaries
+(`V16._SCHEMAS`, `V201._SCHEMAS`). Version-specific behaviour (schema directory,
+filename convention) is resolved via multiple dispatch on the concrete
+`AbstractOCPPSpec` subtype.
 """
 
 import JSONSchema
 
-# Lazy-loaded schema cache: spec type → "Action_msgtype" → JSONSchema.Schema
-const _SCHEMA_CACHE = Dict{DataType,Dict{String,JSONSchema.Schema}}()
+"""
+    _load_all_schemas!(schemas, schema_dir, actions, filename_fn)
 
-function _load_schema(::V16.Spec, action::String, msg_type::Symbol)
-    # V16: "BootNotification.json" (request), "BootNotificationResponse.json" (response)
-    suffix = msg_type == :request ? "" : "Response"
-    fname = "$(action)$(suffix).json"
-    path = joinpath(V16._SCHEMA_DIR, fname)
-    isfile(path) || throw(ArgumentError("No schema file found: $fname"))
-    return JSONSchema.Schema(JSON.parse(read(path, String)))
-end
+Eagerly load all JSON schemas for a given OCPP version into `schemas`.
 
-function _load_schema(::V201.Spec, action::String, msg_type::Symbol)
-    # V201: "BootNotificationRequest.json", "BootNotificationResponse.json"
-    suffix = msg_type == :request ? "Request" : "Response"
-    fname = "$(action)$(suffix).json"
-    path = joinpath(V201._SCHEMA_DIR, fname)
-    isfile(path) || throw(ArgumentError("No schema file found: $fname"))
-    return JSONSchema.Schema(JSON.parse(read(path, String)))
-end
-
-function _get_schema(spec::AbstractOCPPSpec, action::String, msg_type::Symbol)
-    cache = get!(_SCHEMA_CACHE, typeof(spec)) do
-        Dict{String,JSONSchema.Schema}()
+Iterates every action in `actions` and both message types (`:request`, `:response`),
+reads the JSON file, and stores the parsed `JSONSchema.Schema`.
+"""
+function _load_all_schemas!(
+    schemas::Dict{String,JSONSchema.Schema},
+    schema_dir::String,
+    actions::Dict{String,<:NamedTuple},
+    filename_fn,
+)::Nothing
+    for action in keys(actions)
+        for msg_type in (:request, :response)
+            fname = filename_fn(action, msg_type)
+            path = joinpath(schema_dir, fname)
+            isfile(path) || continue
+            key = "$(action)_$(msg_type)"
+            schemas[key] = JSONSchema.Schema(JSON.parse(read(path, String)))
+        end
     end
+    return nothing
+end
+
+function _get_schema(::V16.Spec, action::String, msg_type::Symbol)
     key = "$(action)_$(msg_type)"
-    return get!(cache, key) do
-        _load_schema(spec, action, msg_type)
-    end
+    haskey(V16._SCHEMAS, key) ||
+        throw(ArgumentError("No schema found for action: $action ($msg_type)"))
+    return V16._SCHEMAS[key]
+end
+
+function _get_schema(::V201.Spec, action::String, msg_type::Symbol)
+    key = "$(action)_$(msg_type)"
+    haskey(V201._SCHEMAS, key) ||
+        throw(ArgumentError("No schema found for action: $action ($msg_type)"))
+    return V201._SCHEMAS[key]
 end
 
 """
