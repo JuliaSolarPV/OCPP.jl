@@ -323,6 +323,8 @@ end
 # AST builders (replace Core.eval with returned Expr)
 # ---------------------------------------------------------------------------
 
+const _GENERATED_SOURCE = LineNumberNode(0, Symbol(@__FILE__))
+
 """Build AST for an @enum type with JSON serialization support."""
 function enum_expr(name::Symbol, members::Vector{Pair{Symbol,String}})::Expr
     member_syms = [m.first for m in members]
@@ -334,7 +336,7 @@ function enum_expr(name::Symbol, members::Vector{Pair{Symbol,String}})::Expr
 
     return Expr(
         :block,
-        Expr(:macrocall, Symbol("@enum"), LineNumberNode(0), name, member_syms...),
+        Expr(:macrocall, Symbol("@enum"), _GENERATED_SOURCE, name, member_syms...),
         Expr(:export, name, member_syms...),
         :(const $fwd_name = Dict{$name,String}($(fwd_pairs...))),
         :(const $rev_name = Dict{String,$name}($(rev_pairs...))),
@@ -370,7 +372,7 @@ function struct_expr(name::Symbol, fields)::Expr
         Expr(
             :macrocall,
             Expr(:., :Base, QuoteNode(Symbol("@kwdef"))),
-            LineNumberNode(0),
+            _GENERATED_SOURCE,
             Expr(:struct, false, name, Expr(:block, field_exprs...)),
         ),
     )
